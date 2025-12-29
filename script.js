@@ -1,5 +1,5 @@
 // ==========================
-// DOM Elements
+// DOM ELEMENTS
 // ==========================
 const chatBody = document.querySelector(".chat-body");
 const messageInput = document.querySelector(".message-input");
@@ -7,36 +7,49 @@ const sendMessageButton = document.querySelector("#send-message");
 const fileInput = document.querySelector("#file-input");
 const fileUploadBtn = document.querySelector("#file-upload-btn");
 const themeToggle = document.querySelector("#theme-toggle");
+const emojiBtn = document.querySelector("#emoji-btn");
+const emojiPicker = document.querySelector("#emoji-picker");
 
-// ================= THEME =================
-if (localStorage.getItem("theme") === "dark") {
-    document.body.classList.add("dark");
+// ==========================
+// HELPERS
+// ==========================
+function isGithubPages() {
+    return location.hostname.includes("github.io");
 }
 
-themeToggle.addEventListener("click", () => {
-    document.body.classList.toggle("dark");
-    localStorage.setItem(
-        "theme",
-        document.body.classList.contains("dark") ? "dark" : "light"
-    );
-});
+// ==========================
+// THEME
+// ==========================
+if (themeToggle) {
+    if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark");
+    }
+
+    themeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark");
+        localStorage.setItem(
+            "theme",
+            document.body.classList.contains("dark") ? "dark" : "light"
+        );
+    });
+}
 
 // ==========================
-// OpenRouter Config
+// OPENROUTER CONFIG (LOCAL ONLY)
 // ==========================
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = "YOUR_OPENROUTER_KEY"; // 🔒 backend recommended
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 // ==========================
-// User Data Store
+// USER DATA
 // ==========================
 const userData = {
     message: "",
-    files: [] // uploaded files metadata
+    files: []
 };
 
 // ==========================
-// Create Message Element
+// CREATE MESSAGE ELEMENT
 // ==========================
 const createMessageElement = (content, ...classes) => {
     const div = document.createElement("div");
@@ -46,48 +59,55 @@ const createMessageElement = (content, ...classes) => {
 };
 
 // ==========================
-// Format Bot Response (CODE BLOCK SUPPORT)
+// FORMAT BOT RESPONSE (CODE BLOCKS)
 // ==========================
 function formatBotResponse(text) {
-    // Escape HTML
     text = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-    // Convert ```code``` to <pre><code>
-    text = text.replace(
-        /```(\w+)?([\s\S]*?)```/g,
-        (match, lang, code) => `
-            <pre class="code-block">
-<code>${code.trim()}</code>
-            </pre>
-        `
-    );
+    text = text.replace(/```([\s\S]*?)```/g, (_, code) => {
+        return `<pre class="code-block"><code>${code.trim()}</code></pre>`;
+    });
 
-    // Line breaks
     return text.replace(/\n/g, "<br>");
 }
 
 // ==========================
-// Build Prompt (Message + Files)
+// BUILD PROMPT (TEXT + FILES)
 // ==========================
-const buildUserPrompt = () => {
-    let prompt = `User message:\n${userData.message}\n`;
+function buildUserPrompt() {
+    let prompt = userData.message;
 
-    if (userData.files.length > 0) {
-        prompt += `\nUploaded files:\n`;
-        userData.files.forEach((file, i) => {
-            prompt += `${i + 1}. ${file.name} (${file.type}, ${Math.round(file.size / 1024)} KB)\n`;
+    if (userData.files.length) {
+        prompt += "\n\nUploaded files:\n";
+        userData.files.forEach((f, i) => {
+            prompt += `${i + 1}. ${f.name} (${Math.round(f.size / 1024)} KB)\n`;
         });
     }
 
     return prompt;
-};
+}
 
 // ==========================
-// Generate Bot Response
+// GENERATE BOT RESPONSE (FINAL)
 // ==========================
 const generateBotResponse = async (incomingMessageDiv) => {
     const messageText = incomingMessageDiv.querySelector(".message-text");
 
+    // ✅ DEMO MODE FOR GITHUB PAGES
+    if (isGithubPages()) {
+        setTimeout(() => {
+            messageText.innerHTML = `
+                <strong>Demo Mode 🤖</strong><br>
+                AI is disabled on GitHub Pages for security reasons.
+                <br><br>
+                👉 Backend-powered version available.
+            `;
+            incomingMessageDiv.classList.remove("thinking");
+        }, 700);
+        return;
+    }
+
+    // 🔴 REAL API (LOCAL / BACKEND)
     try {
         const response = await fetch(OPENROUTER_API_URL, {
             method: "POST",
@@ -103,7 +123,7 @@ const generateBotResponse = async (incomingMessageDiv) => {
                     {
                         role: "system",
                         content:
-                            "You are ORBIT, a friendly AI assistant created by Thirumalakonda Sreenu. If code is requested, respond using triple backticks."
+                            "You are ORBIT, a friendly AI assistant created by Thirumalakonda Sreenu. Format code using triple backticks."
                     },
                     {
                         role: "user",
@@ -116,11 +136,12 @@ const generateBotResponse = async (incomingMessageDiv) => {
         const data = await response.json();
         if (!response.ok) throw new Error(data.error?.message);
 
-        const botReply = data.choices[0].message.content;
-        messageText.innerHTML = formatBotResponse(botReply);
+        messageText.innerHTML = formatBotResponse(
+            data.choices[0].message.content
+        );
 
-    } catch (error) {
-        console.error(error);
+    } catch (err) {
+        console.error(err);
         messageText.innerText = "❌ Error getting response";
     } finally {
         incomingMessageDiv.classList.remove("thinking");
@@ -128,7 +149,7 @@ const generateBotResponse = async (incomingMessageDiv) => {
 };
 
 // ==========================
-// Handle User Text Message
+// SEND USER MESSAGE
 // ==========================
 const handleOutgoingMessage = (e) => {
     e.preventDefault();
@@ -149,7 +170,7 @@ const handleOutgoingMessage = (e) => {
     setTimeout(() => {
         const botThinking = createMessageElement(
             `
-            <svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+            <svg class="bot-avatar" viewBox="0 0 1024 1024">
                 <path d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1l166.9-110.6h202.8c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9z"/>
             </svg>
             <div class="message-text">
@@ -172,45 +193,13 @@ const handleOutgoingMessage = (e) => {
 };
 
 // ==========================
-// Emoji Picker
+// FILE UPLOAD
 // ==========================
-const emojiBtn = document.querySelector("#emoji-btn");
-const emojiPicker = document.querySelector("#emoji-picker");
+if (fileUploadBtn) {
+    fileUploadBtn.addEventListener("click", () => fileInput.click());
+}
 
-// Toggle emoji picker
-emojiBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    emojiPicker.classList.toggle("hidden");
-});
-
-// Insert emoji into textarea
-emojiPicker.addEventListener("click", (e) => {
-    if (!e.target.textContent) return;
-
-    const emoji = e.target.textContent;
-    const start = messageInput.selectionStart;
-    const end = messageInput.selectionEnd;
-
-    messageInput.value =
-        messageInput.value.substring(0, start) +
-        emoji +
-        messageInput.value.substring(end);
-
-    messageInput.focus();
-    messageInput.selectionStart = messageInput.selectionEnd = start + emoji.length;
-});
-
-// Close picker when clicking outside
-document.addEventListener("click", () => {
-    emojiPicker.classList.add("hidden");
-});
-
-// ==========================
-// File Upload Handling
-// ==========================
-fileUploadBtn.addEventListener("click", () => fileInput.click());
-
-fileInput.addEventListener("change", () => {
+fileInput?.addEventListener("change", () => {
     const file = fileInput.files[0];
     if (!file) return;
 
@@ -233,7 +222,27 @@ fileInput.addEventListener("change", () => {
 });
 
 // ==========================
-// Event Listeners
+// EMOJI PICKER
+// ==========================
+emojiBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    emojiPicker.classList.toggle("hidden");
+});
+
+emojiPicker?.addEventListener("click", (e) => {
+    if (!e.target.textContent) return;
+
+    const emoji = e.target.textContent;
+    messageInput.value += emoji;
+    messageInput.focus();
+});
+
+document.addEventListener("click", () => {
+    emojiPicker?.classList.add("hidden");
+});
+
+// ==========================
+// EVENTS
 // ==========================
 messageInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") handleOutgoingMessage(e);
