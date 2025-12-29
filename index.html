@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ORBIT Chatbot</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Styles -->
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" />
+</head>
+
+<body>
+
+    <div class="chatbot-popup">
+
+        <!-- ================= Header ================= -->
+        <div class="chat-header">
+            <div class="header-info">
+                <h2 class="logo-text">ORBIT</h2>
+                <p class="status-text">Online • AI Assistant</p>
+            </div>
+
+            <div class="header-actions">
+                <button id="theme-toggle" class="material-symbols-rounded">
+                    dark_mode
+                </button>
+            </div>
+        </div>
+
+        <!-- ================= Chat Body ================= -->
+        <div class="chat-body">
+            <div class="message bot-message">
+                <svg class="bot-avatar" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+                    <path
+                        d="M738.3 287.6H285.7c-59 0-106.8 47.8-106.8 106.8v303.1c0 59 47.8 106.8 106.8 106.8h81.5v111.1l166.9-110.6h202.8c59 0 106.8-47.8 106.8-106.8V394.5c0-59-47.8-106.9-106.8-106.9z">
+                    </path>
+                </svg>
+                <div class="message-text">
+                    Hey 👋 I’m ORBIT.<br>
+                    How can I help you today?
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= Footer ================= -->
+        <div class="chat-footer">
+            <form class="chat-form">
+                <textarea class="message-input" placeholder="Type a message..." required></textarea>
+
+                <div class="chat-controls">
+                    <button type="button" id="emoji-btn" class="material-symbols-rounded">
+                        sentiment_satisfied
+                    </button>
+
+                    <div id="emoji-picker" class="emoji-picker hidden">
+                        <span>😀</span><span>😁</span><span>😂</span><span>🤣</span>
+                        <span>😊</span><span>😍</span><span>😎</span><span>🤔</span>
+                        <span>😢</span><span>😡</span><span>👍</span><span>🙏</span>
+                        <span>💡</span><span>🚀</span><span>💻</span><span>❤️</span>
+                        <span>🎉</span>
+                    </div>
+
+                    <input type="file" id="file-input" hidden>
+                    <button type="button" id="file-upload-btn" class="material-symbols-rounded">
+                        attach_file
+                    </button>
+
+                    <button type="submit" id="send-message" class="material-symbols-rounded">
+                        arrow_upward
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
