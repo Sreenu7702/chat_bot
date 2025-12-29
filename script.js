@@ -24,7 +24,7 @@ themeToggle.addEventListener("click", () => {
 // ==========================
 // OpenRouter Config
 // ==========================
-const OPENROUTER_API_KEY = "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";
+const OPENROUTER_API_KEY = "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";
 const OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions";
 
 // ==========================
